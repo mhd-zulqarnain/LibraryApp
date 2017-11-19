@@ -25,6 +25,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.UploadTask;
 
 /**
  * Created by Zul Qarnain on 11/19/2017.
@@ -39,9 +40,11 @@ public class AddBookFragement extends Fragment implements View.OnClickListener {
     private Button btnaddImage;
     private DatabaseReference ref;
     private FirebaseAuth auth;
-    private final int PICK_IMAGE_REQUEST =1;
+    private final int PICK_IMAGE_REQUEST = 1;
     private Uri mImagePath;
     private StorageReference reference;
+    private String title;
+    private String des;
 
     @Nullable
     @Override
@@ -68,7 +71,7 @@ public class AddBookFragement extends Fragment implements View.OnClickListener {
 
             saveRecord();
 
-        } else if (view.getId()==R.id.btn_add_image){
+        } else if (view.getId() == R.id.btn_add_image) {
 
             Intent intent = new Intent();
             intent.setType("image/*");
@@ -77,10 +80,10 @@ public class AddBookFragement extends Fragment implements View.OnClickListener {
         }
     }
 
-    public void saveRecord(){
+    public void saveRecord() {
 
-        String title = edTitle.getText().toString();
-        String des = edDesc.getText().toString();
+        title = edTitle.getText().toString();
+        des = edDesc.getText().toString();
 
         if (TextUtils.isEmpty(title)) {
             Messege.messege(getContext(), "Add title of the book");
@@ -91,32 +94,33 @@ public class AddBookFragement extends Fragment implements View.OnClickListener {
             Messege.messege(getContext(), "Add title of the book");
             return;
         }
-
-        String key = ref.push().getKey();
-        Book book = new Book(title, des, "null", key);
-        ref.child(key).setValue(book);
-
         if (mImagePath != null) {
-//            StorageReference ref = reference.child(mImagePath.)
-           /* StorageReference ref = taskPhotoRef.child(mImagePath.getLastPathSegment());
-            ref.putFile(mImagePath).
+
+            StorageReference Sref = reference.child(mImagePath.getLastPathSegment());
+            Sref.putFile(mImagePath).
                     addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                         @Override
                         public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                             @SuppressWarnings("VisibleForTests")
                             Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                            String key = String.valueOf(mDataBase.push().getKey());
-                            Task task = new Task(mTaskName.getText().toString(), key,downloadUrl.toString());
-                            mDataBase.child(key).setValue(task);
+                            String key = ref.push().getKey();
+                            Book book = new Book(title, des, downloadUrl.toString(), key);
+                            ref.child(key).setValue(book);
+                            clearFileds();
                         }
+
                     });
         } else {
-            Messege.messege(getContext(), "pubmission failed");
-            String key = String.valueOf(mDataBase.push().getKey());
-            Task myTask  =new Task(mTaskName.getText().toString(),key,"null");
-            mDataBase.child(key).setValue(myTask);*/
+            Messege.messege(getContext(), "Error");
 
         }
+    }
+
+    public void clearFileds() {
+        edTitle.setText("");
+        edDesc.setText("");
+        mImagePath =null;
+
     }
 
     @Override
